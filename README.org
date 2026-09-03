@@ -1,0 +1,5 @@
+* Introdução
+Seja bem-vindo ao =jclmntn_dotfiles=.
+Antes, eu tinha um repositório apartado com todas as minhas configurações de Emacs. Assim como todo os anos desde 2022, fiquei maluco e decidi dar uma faxinada na minha configuração hoje, [2026-09-01 Tue].
+
+O muda? Bem, ao invés de deixar todas minhas configurações de Emacs centralizadas num repositório único, vou deixar minhas configurações de todas as coisas neste repositório e vou utilizar o GNU Stow para que as mudanças fiquem disponibilizadas em diferentes máquinas de trabalho.
