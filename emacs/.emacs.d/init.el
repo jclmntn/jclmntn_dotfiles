@@ -574,10 +574,7 @@
      (corfu-auto-prefix 1)
      (corfu-auto t)
      :init
-     (global-corfu-mode)
-     (advice-add 'python-shell-completion-at-point :around
-                 (lambda (fun &optional arg)
-                   (cape-wrap-noninterruptible (lambda () (funcall fun arg))))))))
+     (global-corfu-mode))))
 
 (defun jclmntn/ejc-maybe-add-limit (args)
   "Inject LIMIT 200 into SELECT queries that do not already specify a limit."
