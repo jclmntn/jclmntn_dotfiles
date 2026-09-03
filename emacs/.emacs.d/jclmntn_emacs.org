@@ -34,8 +34,12 @@ Vou deixar aqui algumas coisas que eu gostaria de melhorar e que pretendo ajusta
 :LOGBOOK:
 - State "TODO"       from              [2026-09-02 Wed 16:27]
 :END:
-** TODO Fazer com que completions apareçam abaixo do minibuffer
+** KILL Fazer com que completions apareçam abaixo do minibuffer
+CLOSED: [2026-09-03 Thu 07:26]
 :LOGBOOK:
+- Note taken on [2026-09-03 Thu 07:26] \\
+  Não é possível por questões estruturais.
+- State "KILL"       from "TODO"       [2026-09-03 Thu 07:26]
 - State "TODO"       from              [2026-09-01 Tue 18:14]
 :END:
 ** DONE Corrigir o problema de completions no org-mode, que não insere cabeçalhos
@@ -587,9 +591,9 @@ Um dos problemas mais prementes é que as sugestões do completion buffer, relac
 Precisa do =Enchant-2= instalado. Se eu estiver usando o =aspell= como dicionário, lembrar de instalar o =enchant2-aspell=.
 O papel do enchant é encontrar qualquer tipo de dicionário encontrado na minha máquina.
 Lembre-se que o =jinx-languages= precisa ter separação de idiomas com espaços numa única string.
+Antes, o jinx era carregado após o =embark=, mas isso fazia com que ele nunca ficasse ativo.
 #+begin_src elisp :tangle "init.el"
 (use-package jinx
-  :after embark
   :if (eq system-type 'gnu/linux)
   :hook (emacs-startup . global-jinx-mode)
   :bind (("M-$" . jinx-correct)
@@ -598,6 +602,7 @@ Lembre-se que o =jinx-languages= precisa ter separação de idiomas com espaços
   (jinx-languages "pt_BR en_US")
   :config
   (setq ispell-alternate-dictionary (expand-file-name "pt_BR_words.txt" user-emacs-directory))
+  (with-eval-after-load 'embark
   (keymap-set jinx-repeat-map "RET" 'jinx-correct)
   (embark-define-overlay-target jinx category (eq %p 'jinx-overlay))
   (add-to-list 'embark-default-action-overrides '(jinx . jinx-correct))
@@ -605,12 +610,12 @@ Lembre-se que o =jinx-languages= precisa ter separação de idiomas com espaços
   (add-to-list 'embark-keymap-alist '(jinx jinx-repeat-map embark-general-map))
   (add-to-list 'embark-repeat-actions #'jinx-next)
   (add-to-list 'embark-repeat-actions #'jinx-previous)
-  (add-to-list 'embark-target-injection-hooks (list #'jinx-correct #'embark--ignore-target)))
+  (add-to-list 'embark-target-injection-hooks (list #'jinx-correct #'embark--ignore-target))))
 #+end_src
 
-Executar isso gera um dump de palavras para o autocomplete emportuguês brasileiro:
+Executar isso gera um dump de palavras para o autocomplete em português brasileiro, isso fazendo expansões corretas de diferentes tipos de palavras:
 #+begin_src sh
-aspell -d pt_BR dump master > ~/.emacs.d/pt_BR_words.txt
+aspell --lang=pt_BR dump master | aspell --lang=pt_BR expand | tr ' ' '\n' | sort -u > ~/.emacs.d/pt_BR_words.txt
 #+end_src
 
 #+begin_src elisp :tangle "init.el"
@@ -700,8 +705,11 @@ Ultimamente, eu tendo a preferir a solução nativa do Emacs, que é o =eglot=. 
 #+end_src
 
 Preciso integrar o =yasnippets= ao =eglot=, e para isso eu uso o =cape=, que ajuda a criar uma =completion-at-point-function='s. Tudo isso foi tirado desse [[https://github.com/minad/corfu/wiki#making-a-cape-super-capf-for-eglot][link]], provavelmente.
+Eu também criei um dicionário em português local baseado no cape e integrado ao org-mode. Olhe em [[*Correções ortográficas]] como gerar o arquivo de dicionário. Não esqueça de adicionar a =completion-at-point-function= no setup do =org-mode=.
 #+begin_src elisp :tangle "init.el"
-(use-package cape)
+(use-package cape
+    :custom
+    (cape-dict-file (expand-file-name "pt_BR_words.txt" user-emacs-directory)))
 (use-package yasnippet-capf :after cape)
 
 (defun jclmntn/eglot-capf-with-yasnippet ()
@@ -776,6 +784,7 @@ Projetos =uv= criam um =pyproject.toml= em suas raízes. Isso faz com que o proj
 
 *** Sugestões/Autocomplete
 Abandonei o =corfu= a partir do emacs 31 por uma solução menos intrusiva.
+Adicionei o =org-self-insert-command= como um dos comandos do preview porque eu gostaria de testar a experiência de ter sugestões enquanto digito prosa/texto.
 #+begin_src elisp :tangle "init.el"
 (pcase emacs-version
   ("31.1"
@@ -791,7 +800,9 @@ Abandonei o =corfu= a partir do emacs 31 por uma solução menos intrusiva.
        ("M-<return>" . completion-preview-insert)
        ;; Mostra candidatos
        ("<tab>" . completion-preview-complete))
-     :config (global-completion-preview-mode 1)))
+     :config
+    (push 'org-self-insert-command completion-preview-commands)
+     (global-completion-preview-mode 1)))
   (_
    (use-package corfu
      :custom
@@ -874,9 +885,8 @@ Essa primeira função organiza alguns aspectos visuais de /buffers/ do =org-mod
   (org-indent-mode)
   (variable-pitch-mode 1)
   (visual-line-mode)
-  (add-hook 'completion-at-point-functions
-            (cape-capf-super #'yasnippet-capf)
-            nil t))
+  (add-hook 'completion-at-point-functions (cape-capf-super #'yasnippet-capf) nil t)
+  (add-hook 'completion-at-point-functions #'cape-dict nil t))
 #+end_src
 
 Essa função permite que os resultados do =org-babel= tenham formatação colorida quando for possível.

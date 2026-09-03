@@ -416,7 +416,6 @@
    (consult-notes-denote-title-width 50)))
 
 (use-package jinx
-  :after embark
   :if (eq system-type 'gnu/linux)
   :hook (emacs-startup . global-jinx-mode)
   :bind (("M-$" . jinx-correct)
@@ -425,6 +424,7 @@
   (jinx-languages "pt_BR en_US")
   :config
   (setq ispell-alternate-dictionary (expand-file-name "pt_BR_words.txt" user-emacs-directory))
+  (with-eval-after-load 'embark
   (keymap-set jinx-repeat-map "RET" 'jinx-correct)
   (embark-define-overlay-target jinx category (eq %p 'jinx-overlay))
   (add-to-list 'embark-default-action-overrides '(jinx . jinx-correct))
@@ -432,7 +432,7 @@
   (add-to-list 'embark-keymap-alist '(jinx jinx-repeat-map embark-general-map))
   (add-to-list 'embark-repeat-actions #'jinx-next)
   (add-to-list 'embark-repeat-actions #'jinx-previous)
-  (add-to-list 'embark-target-injection-hooks (list #'jinx-correct #'embark--ignore-target)))
+  (add-to-list 'embark-target-injection-hooks (list #'jinx-correct #'embark--ignore-target))))
 
 (use-package ispell
   :custom
@@ -494,7 +494,9 @@
                 rass-separator
                 pylsp-server-command))))
 
-(use-package cape)
+(use-package cape
+    :custom
+    (cape-dict-file (expand-file-name "pt_BR_words.txt" user-emacs-directory)))
 (use-package yasnippet-capf :after cape)
 
 (defun jclmntn/eglot-capf-with-yasnippet ()
@@ -562,7 +564,9 @@
        ("M-<return>" . completion-preview-insert)
        ;; Mostra candidatos
        ("<tab>" . completion-preview-complete))
-     :config (global-completion-preview-mode 1)))
+     :config
+    (push 'org-self-insert-command completion-preview-commands)
+     (global-completion-preview-mode 1)))
   (_
    (use-package corfu
      :custom
@@ -635,9 +639,8 @@
   (org-indent-mode)
   (variable-pitch-mode 1)
   (visual-line-mode)
-  (add-hook 'completion-at-point-functions
-            (cape-capf-super #'yasnippet-capf)
-            nil t))
+  (add-hook 'completion-at-point-functions (cape-capf-super #'yasnippet-capf) nil t)
+  (add-hook 'completion-at-point-functions #'cape-dict nil t))
 
 (defun jclmntn/babel-ansi ()
   (when-let ((beg (org-babel-where-is-src-block-result nil nil)))
