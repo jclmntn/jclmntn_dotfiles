@@ -7,31 +7,22 @@ Vou deixar aqui algumas coisas que eu gostaria de melhorar e que pretendo ajusta
 :LOGBOOK:
 - State "TODO"       from              [2026-09-01 Tue 18:14]
 :END:
-** TODO Melhorar as completions de portugues
+** DONE Melhorar as completions de portugues
+CLOSED: [2026-09-03 Thu 20:48]
 :LOGBOOK:
+- Note taken on [2026-09-03 Thu 20:48] \\
+  Na real, eu odiei a experiencia de ter completions do idioma português.
+- State "DONE"       from "TODO"       [2026-09-03 Thu 20:48]
 - Note taken on [2026-09-02 Wed 16:32] \\
   por exemplo, seria possível adicionar completion preview assim:
-  #+begin_src elisp
-  ;; Set cape-dict to use your Portuguese words file
-  (use-package cape
-    :custom
-    (cape-dict-file (expand-file-name "pt_BR_words.txt" user-emacs-directory)))
-
-  ;; Add cape-dict locally to Org mode without destroying other CAPFs
-  (defun jclmntn/org-mode-setup ()
-    (org-indent-mode)
-    (variable-pitch-mode 1)
-    (visual-line-mode)
-    (add-hook 'completion-at-point-functions #'cape-dict nil t)
-    (add-hook 'completion-at-point-functions 
-              (cape-capf-super #'yasnippet-capf) nil t))
-  #+end_src
 - Note taken on [2026-09-02 Wed 16:26] \\
   O aspell tem umas completions meio nada a ver, com vários caracteres sobrando.
 - State "TODO"       from              [2026-09-02 Wed 16:26]
 :END:
-** TODO Fazer com que as completions do org-mode tenham preview
+** DONE Fazer com que as completions do org-mode tenham preview
+CLOSED: [2026-09-03 Thu 20:48]
 :LOGBOOK:
+- State "DONE"       from "TODO"       [2026-09-03 Thu 20:48]
 - State "TODO"       from              [2026-09-02 Wed 16:27]
 :END:
 ** KILL Fazer com que completions apareçam abaixo do minibuffer
@@ -556,8 +547,6 @@ Para ações contextuais de minibuffer, eu utilizo o =embark=.
   (completion-styles '(orderless basic))
   (completion-category-overrides '((file (styles basic partial-completion)))))
 #+end_src
-
-
 ** Busca em geral
 Aqui estou inserindo todas as coisas relacionadas ao =consult=.
 Um dos problemas mais prementes é que as sugestões do completion buffer, relacionadas como o [[*Minibuffer]] também estão apresentando um problema desagradável, que eu comento em [[*Anotações]].
@@ -601,7 +590,6 @@ Antes, o jinx era carregado após o =embark=, mas isso fazia com que ele nunca f
   :custom
   (jinx-languages "pt_BR en_US")
   :config
-  (setq ispell-alternate-dictionary (expand-file-name "pt_BR_words.txt" user-emacs-directory))
   (with-eval-after-load 'embark
   (keymap-set jinx-repeat-map "RET" 'jinx-correct)
   (embark-define-overlay-target jinx category (eq %p 'jinx-overlay))
@@ -619,9 +607,9 @@ aspell --lang=pt_BR dump master | aspell --lang=pt_BR expand | tr ' ' '\n' | sor
 #+end_src
 
 #+begin_src elisp :tangle "init.el"
-(use-package ispell
-  :custom
-  (ispell-alternate-dictionary (expand-file-name "pt_BR_words.txt" user-emacs-directory)))
+;; (use-package ispell
+;;   :custom
+;;   (ispell-alternate-dictionary (expand-file-name "pt_BR_words.txt" user-emacs-directory)))
 #+end_src
 
 ** Anotações
@@ -642,30 +630,36 @@ Para anotar coisas que aparecem no =Completions=, eu utilizo o =marginalia=. Ess
 *** Controle de Versionamento
 Eu não uso tanto o =vc= do Emacs, costumo usar muito mais o =magit=. Perceba o uso do modo hl-todo para fazer marcações coloridas nos buffers do magit.
 #+begin_src elisp :tangle "init.el" 
-  (use-package magit
-    :custom
-    (magit-display-buffer-action #'magit-display-buffer-same-window-except-diff-v1))
+(use-package magit
+  :custom
+  (magit-display-buffer-action #'magit-display-buffer-same-window-except-diff-v1))
 
-  (with-eval-after-load 'magit
-      (add-hook 'magit-log-wash-summary-hook
-                #'hl-todo-search-and-highlight t)
-      (add-hook 'magit-revision-wash-message-hook
-                #'hl-todo-search-and-highlight t))
+(with-eval-after-load 'magit
+  (add-hook 'magit-log-wash-summary-hook
+            #'hl-todo-search-and-highlight t)
+  (add-hook 'magit-revision-wash-message-hook
+            #'hl-todo-search-and-highlight t))
 
-  ;; Não está funcionando atualmente, preciso entender o porquê.
-  ;; Abri um PR no Forge.
-  (use-package forge
-    :after magit)
+;; Não está funcionando atualmente, preciso entender o porquê.
+;; Abri um PR no Forge.
+(use-package forge
+  :after magit)
 
-  (use-package magit-todos
-    :after magit
-    :config (magit-todos-mode 1))
+(use-package magit-todos
+  :after magit
+  :config (magit-todos-mode 1))
 
-  ;; Pra forçar a codificação do comando git.
-  ;; Engraçado que isso tenha dado certo, significa que por alguma razão o git tem outra codificação mesmo no WSL.
-  (setq-default process-coding-system-alist (cons '("git" . (utf-8 . utf-8)) process-coding-system-alist))
+;; Pra forçar a codificação do comando git.
+;; Engraçado que isso tenha dado certo, significa que por alguma razão o git tem outra codificação mesmo no WSL.
+(setq-default process-coding-system-alist (cons '("git" . (utf-8 . utf-8)) process-coding-system-alist))
 #+end_src
 
+Porém, eu preciso ativar uma opção específica para o VC, que é a de que eu pulo para a versão controlada de arquivos que possuem links simbólicos.
+#+begin_src elisp :tangle "init.el"
+(use-package vc-hooks
+  :ensure nil
+  :custom (vc-follow-symlinks t))
+#+end_src
 *** Expansões/Snippets
 Eu tendo a utilizar o =yasnippet= para expansões.
 #+begin_src elisp :tangle "init.el"
@@ -706,10 +700,13 @@ Ultimamente, eu tendo a preferir a solução nativa do Emacs, que é o =eglot=. 
 
 Preciso integrar o =yasnippets= ao =eglot=, e para isso eu uso o =cape=, que ajuda a criar uma =completion-at-point-function='s. Tudo isso foi tirado desse [[https://github.com/minad/corfu/wiki#making-a-cape-super-capf-for-eglot][link]], provavelmente.
 Eu também criei um dicionário em português local baseado no cape e integrado ao org-mode. Olhe em [[*Correções ortográficas]] como gerar o arquivo de dicionário. Não esqueça de adicionar a =completion-at-point-function= no setup do =org-mode=.
+
+[2026-09-03 Thu] Eu meio que odiei a experiência de ter sugestões em português. As palavras são horríveis.
 #+begin_src elisp :tangle "init.el"
-(use-package cape
-    :custom
-    (cape-dict-file (expand-file-name "pt_BR_words.txt" user-emacs-directory)))
+(use-package cape)
+    ;; :custom
+    ;; (cape-dict-file (expand-file-name "pt_BR_words.txt" user-emacs-directory))
+    ;; )
 (use-package yasnippet-capf :after cape)
 
 (defun jclmntn/eglot-capf-with-yasnippet ()
@@ -882,8 +879,8 @@ Essa primeira função organiza alguns aspectos visuais de /buffers/ do =org-mod
   (org-indent-mode)
   (variable-pitch-mode 1)
   (visual-line-mode)
-  (add-hook 'completion-at-point-functions (cape-capf-super #'yasnippet-capf) nil t)
-  (add-hook 'completion-at-point-functions #'cape-dict nil t))
+  (add-hook 'completion-at-point-functions (cape-capf-super #'yasnippet-capf) nil t))
+  ;; (add-hook 'completion-at-point-functions #'cape-dict nil t)
 #+end_src
 
 Essa função permite que os resultados do =org-babel= tenham formatação colorida quando for possível.

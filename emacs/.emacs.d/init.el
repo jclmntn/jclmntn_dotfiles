@@ -423,7 +423,6 @@
   :custom
   (jinx-languages "pt_BR en_US")
   :config
-  (setq ispell-alternate-dictionary (expand-file-name "pt_BR_words.txt" user-emacs-directory))
   (with-eval-after-load 'embark
   (keymap-set jinx-repeat-map "RET" 'jinx-correct)
   (embark-define-overlay-target jinx category (eq %p 'jinx-overlay))
@@ -434,9 +433,9 @@
   (add-to-list 'embark-repeat-actions #'jinx-previous)
   (add-to-list 'embark-target-injection-hooks (list #'jinx-correct #'embark--ignore-target))))
 
-(use-package ispell
-  :custom
-  (ispell-alternate-dictionary (expand-file-name "pt_BR_words.txt" user-emacs-directory)))
+;; (use-package ispell
+;;   :custom
+;;   (ispell-alternate-dictionary (expand-file-name "pt_BR_words.txt" user-emacs-directory)))
 
 (use-package marginalia
   ;; :after vertico
@@ -446,28 +445,32 @@
 (use-package eca
   :vc (:url "https://github.com/editor-code-assistant/eca-emacs" :rev :newest))
 
-  (use-package magit
-    :custom
-    (magit-display-buffer-action #'magit-display-buffer-same-window-except-diff-v1))
+(use-package magit
+  :custom
+  (magit-display-buffer-action #'magit-display-buffer-same-window-except-diff-v1))
 
-  (with-eval-after-load 'magit
-      (add-hook 'magit-log-wash-summary-hook
-                #'hl-todo-search-and-highlight t)
-      (add-hook 'magit-revision-wash-message-hook
-                #'hl-todo-search-and-highlight t))
+(with-eval-after-load 'magit
+  (add-hook 'magit-log-wash-summary-hook
+            #'hl-todo-search-and-highlight t)
+  (add-hook 'magit-revision-wash-message-hook
+            #'hl-todo-search-and-highlight t))
 
-  ;; Não está funcionando atualmente, preciso entender o porquê.
-  ;; Abri um PR no Forge.
-  (use-package forge
-    :after magit)
+;; Não está funcionando atualmente, preciso entender o porquê.
+;; Abri um PR no Forge.
+(use-package forge
+  :after magit)
 
-  (use-package magit-todos
-    :after magit
-    :config (magit-todos-mode 1))
+(use-package magit-todos
+  :after magit
+  :config (magit-todos-mode 1))
 
-  ;; Pra forçar a codificação do comando git.
-  ;; Engraçado que isso tenha dado certo, significa que por alguma razão o git tem outra codificação mesmo no WSL.
-  (setq-default process-coding-system-alist (cons '("git" . (utf-8 . utf-8)) process-coding-system-alist))
+;; Pra forçar a codificação do comando git.
+;; Engraçado que isso tenha dado certo, significa que por alguma razão o git tem outra codificação mesmo no WSL.
+(setq-default process-coding-system-alist (cons '("git" . (utf-8 . utf-8)) process-coding-system-alist))
+
+(use-package vc-hooks
+  :ensure nil
+  :custom (vc-follow-symlinks t))
 
 (use-package yasnippet
   :config
@@ -494,9 +497,10 @@
                 rass-separator
                 pylsp-server-command))))
 
-(use-package cape
-    :custom
-    (cape-dict-file (expand-file-name "pt_BR_words.txt" user-emacs-directory)))
+(use-package cape)
+    ;; :custom
+    ;; (cape-dict-file (expand-file-name "pt_BR_words.txt" user-emacs-directory))
+    ;; )
 (use-package yasnippet-capf :after cape)
 
 (defun jclmntn/eglot-capf-with-yasnippet ()
@@ -636,8 +640,8 @@
   (org-indent-mode)
   (variable-pitch-mode 1)
   (visual-line-mode)
-  (add-hook 'completion-at-point-functions (cape-capf-super #'yasnippet-capf) nil t)
-  (add-hook 'completion-at-point-functions #'cape-dict nil t))
+  (add-hook 'completion-at-point-functions (cape-capf-super #'yasnippet-capf) nil t))
+  ;; (add-hook 'completion-at-point-functions #'cape-dict nil t)
 
 (defun jclmntn/babel-ansi ()
   (when-let ((beg (org-babel-where-is-src-block-result nil nil)))
