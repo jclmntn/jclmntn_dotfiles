@@ -872,8 +872,9 @@ Adicionei o =org-self-insert-command= como um dos comandos do preview porque eu 
   :commands (notmuch notmuch-search)
   :bind ("C-c m" . notmuch)
   :custom
+  ((notmuch-search-oldest-first nil)
   '(("jclmntn@gmail.com" . "jclmntn@gmail.com/Sent +sent -unread")
-    ("grancade@gmail.com" . "jclmntn@gmail.com/Sent +sent -unread")))
+    ("grancade@gmail.com" . "jclmntn@gmail.com/Sent +sent -unread"))))
 #+end_src
 * ORGanização
 Tudo sobre org-mode fica aqui!

@@ -634,8 +634,9 @@
   :commands (notmuch notmuch-search)
   :bind ("C-c m" . notmuch)
   :custom
+  ((notmuch-search-oldest-first nil)
   '(("jclmntn@gmail.com" . "jclmntn@gmail.com/Sent +sent -unread")
-    ("grancade@gmail.com" . "jclmntn@gmail.com/Sent +sent -unread")))
+    ("grancade@gmail.com" . "jclmntn@gmail.com/Sent +sent -unread"))))
 
 (defun jclmntn/org-mode-setup ()
   (org-indent-mode)
