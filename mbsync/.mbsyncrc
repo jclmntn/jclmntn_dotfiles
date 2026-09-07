@@ -1,0 +1,68 @@
+# ===================================
+# Conta Principal (jclmntn@gmail.com)
+# ===================================
+IMAPAccount principal
+Host imap.gmail.com
+Port 993
+User jclmntn@gmail.com
+PassCmd "~/.local/bin/mbsync-pass.sh imap.gmail.com jclmntn@gmail.com"
+AuthMechs LOGIN
+TLSType IMAPS
+
+IMAPStore principal-remote
+Account principal
+Trash "[Gmail]/Trash"
+TrashNewOnly no
+
+# Local Maildir store
+MaildirStore principal-local
+Subfolders Verbatim
+Path ~/mail/jclmntn@gmail.com/
+Inbox ~/mail/jclmntn@gmail.com/INBOX
+
+# Sync channel
+Channel principal
+Far :principal-remote:
+Near :principal-local:
+Patterns *
+Create Both
+Expunge Both
+SyncState *
+
+# ===================================
+# Conta Secundária (grancade@gmail.com)
+# ===================================
+IMAPAccount secondary
+Host imap.gmail.com
+Port 993
+User grancade@gmail.com
+PassCmd "~/.local/bin/mbsync-pass.sh imap.gmail.com grancade@gmail.com"
+AuthMechs LOGIN
+TLSType IMAPS
+
+IMAPStore secondary-remote
+Account secondary
+Trash "[Gmail]/Trash"
+TrashNewOnly no
+
+# Local Maildir store
+MaildirStore secondary-local
+Subfolders Verbatim
+Path ~/mail/grancade@gmail.com/
+Inbox ~/mail/grancade@gmail.com/INBOX
+
+# Sync channel
+Channel secondary
+Far :secondary-remote:
+Near :secondary-local:
+Patterns *
+Create Both
+Expunge Both
+SyncState *
+
+# ===================================
+# Group: run all channels together with -a
+# ===================================
+Group all
+Channel principal
+Channel secondary

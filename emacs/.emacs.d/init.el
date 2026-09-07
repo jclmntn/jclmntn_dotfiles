@@ -233,6 +233,9 @@
                            ("https://grouplens.org/feed/" blog computing)
                            ("https://protesilaos.com/master.xml" blog philosophy emacs)))))
 
+(use-package pinentry
+  :config (pinentry-start))
+
   (use-package hl-todo
     :vc (:url "https://github.com/tarsius/hl-todo" :rev :newest)
     :hook ((prog-mode . hl-todo-mode)
@@ -554,31 +557,21 @@
   ((project-mode-line t)
    (project-vc-extra-root-markers '("pyproject.toml"))))
 
-(pcase emacs-version
-  ("31.1"
-   (use-package completion-preview
-     :ensure nil
-     :demand t
-     :custom (completion-preview-minimum-symbol-length 1)
-     :bind
-     ( :map completion-preview-active-mode-map
-       ("M-i" . completion-preview-insert-word)
-       ("M-n" . completion-preview-next-candidate)
-       ("M-p" . completion-preview-prev-candidate)
-       ("M-<return>" . completion-preview-insert)
-       ;; Mostra candidatos
-       ("<tab>" . completion-preview-complete))
-     :config
-    (push 'org-self-insert-command completion-preview-commands)
-     (global-completion-preview-mode 1)))
-  (_
-   (use-package corfu
-     :custom
-     (corfu-cycle t)
-     (corfu-auto-prefix 1)
-     (corfu-auto t)
-     :init
-     (global-corfu-mode))))
+(use-package completion-preview
+  :ensure nil
+  :demand t
+  :custom (completion-preview-minimum-symbol-length 1)
+  :bind
+  ( :map completion-preview-active-mode-map
+    ("M-i" . completion-preview-insert-word)
+    ("M-n" . completion-preview-next-candidate)
+    ("M-p" . completion-preview-prev-candidate)
+    ("M-<return>" . completion-preview-insert)
+    ;; Mostra candidatos
+    ("<tab>" . completion-preview-complete))
+  :config
+  (push 'org-self-insert-command completion-preview-commands)
+  (global-completion-preview-mode 1))
 
 (defun jclmntn/ejc-maybe-add-limit (args)
   "Inject LIMIT 200 into SELECT queries that do not already specify a limit."
@@ -635,6 +628,14 @@
      :subname subname
      :user user
      :password password)))
+
+(use-package
+  notmuch
+  :commands (notmuch notmuch-search)
+  :bind ("C-c m" . notmuch)
+  :custom
+  '(("jclmntn@gmail.com" . "jclmntn@gmail.com/Sent +sent -unread")
+    ("grancade@gmail.com" . "jclmntn@gmail.com/Sent +sent -unread")))
 
 (defun jclmntn/org-mode-setup ()
   (org-indent-mode)

@@ -347,6 +347,13 @@ Meu leitor de feeds RSS de escolha. Também criei uma função para exportar dad
                            ("https://grouplens.org/feed/" blog computing)
                            ("https://protesilaos.com/master.xml" blog philosophy emacs)))))
 #+end_src
+** pinentry
+Para conseguir digitar senhas/pins durante o processo de criptografia e descriptografia do /gpg/authinfo/.
+Depois preciso validar se eu preciso ativar o /emacsclient/.
+#+begin_src elisp :tangle "init.el"
+(use-package pinentry
+  :config (pinentry-start))
+#+end_src
 * Embelezamento do Emacs
 Algumas configurações relacionadas ao próprio embelezamento do Emacs e derivados.
 ** Destaque de palavras-chave em código
@@ -783,31 +790,21 @@ Projetos =uv= criam um =pyproject.toml= em suas raízes. Isso faz com que o proj
 Abandonei o =corfu= a partir do emacs 31 por uma solução menos intrusiva.
 Adicionei o =org-self-insert-command= como um dos comandos do preview porque eu gostaria de testar a experiência de ter sugestões enquanto digito prosa/texto.
 #+begin_src elisp :tangle "init.el"
-(pcase emacs-version
-  ("31.1"
-   (use-package completion-preview
-     :ensure nil
-     :demand t
-     :custom (completion-preview-minimum-symbol-length 1)
-     :bind
-     ( :map completion-preview-active-mode-map
-       ("M-i" . completion-preview-insert-word)
-       ("M-n" . completion-preview-next-candidate)
-       ("M-p" . completion-preview-prev-candidate)
-       ("M-<return>" . completion-preview-insert)
-       ;; Mostra candidatos
-       ("<tab>" . completion-preview-complete))
-     :config
-    (push 'org-self-insert-command completion-preview-commands)
-     (global-completion-preview-mode 1)))
-  (_
-   (use-package corfu
-     :custom
-     (corfu-cycle t)
-     (corfu-auto-prefix 1)
-     (corfu-auto t)
-     :init
-     (global-corfu-mode))))
+(use-package completion-preview
+  :ensure nil
+  :demand t
+  :custom (completion-preview-minimum-symbol-length 1)
+  :bind
+  ( :map completion-preview-active-mode-map
+    ("M-i" . completion-preview-insert-word)
+    ("M-n" . completion-preview-next-candidate)
+    ("M-p" . completion-preview-prev-candidate)
+    ("M-<return>" . completion-preview-insert)
+    ;; Mostra candidatos
+    ("<tab>" . completion-preview-complete))
+  :config
+  (push 'org-self-insert-command completion-preview-commands)
+  (global-completion-preview-mode 1))
 #+end_src
 
 *** SQL
@@ -868,7 +865,16 @@ Adicionei o =org-self-insert-command= como um dos comandos do preview porque eu 
      :user user
      :password password)))
 #+end_src
-
+** Administração de e-mails
+#+begin_src elisp :tangle "init.el"
+(use-package
+  notmuch
+  :commands (notmuch notmuch-search)
+  :bind ("C-c m" . notmuch)
+  :custom
+  '(("jclmntn@gmail.com" . "jclmntn@gmail.com/Sent +sent -unread")
+    ("grancade@gmail.com" . "jclmntn@gmail.com/Sent +sent -unread")))
+#+end_src
 * ORGanização
 Tudo sobre org-mode fica aqui!
 ** Funções customizadas
