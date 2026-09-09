@@ -3,5 +3,6 @@ Description=Mailbox synchronization service
 
 [Service]
 Type=oneshot
+ExecStartPre=/bin/sh -c 'notmuch search --output=files tag:deleted | xargs -d "\n" rm -f'
 ExecStart=/usr/bin/mbsync -a
 ExecStartPost=/usr/bin/notmuch new
