@@ -3,8 +3,16 @@ Este é o =jclmntn_emacs=, um arquivo org-mode que contém minha configuração 
 
 * Coisas para fazer
 Vou deixar aqui algumas coisas que eu gostaria de melhorar e que pretendo ajustar com o passar do tempo
-** TODO Corrigir o cookie de completions
+** TODO Ajustar o surgimento de buffers de captura
 :LOGBOOK:
+- State "TODO"       from              [2026-09-01 Tue 20:22]
+- Note taken on [2026-09-01 Tue 20:22] \\
+  Quando faço uma captura, o buffer de captura aberto esconde o que estava previamente sendo feito. Seria mais elegante se ele só abrisse algo, sem fechar o buffer.
+:END:
+** KILL Corrigir o cookie de completions
+CLOSED: [2026-09-12 Sat 16:15]
+:LOGBOOK:
+- State "KILL"       from "TODO"       [2026-09-12 Sat 16:15]
 - State "TODO"       from              [2026-09-01 Tue 18:14]
 :END:
 ** DONE Melhorar as completions de portugues
@@ -59,12 +67,6 @@ CLOSED: [2026-09-02 Wed 16:34]
   Sugestões advindas do =consult= que preenchem o =Completions= buffer estão com um espaçamento muito grande.
 - State "TODO"       from              [2026-09-01 Tue 19:35]
 :END:
-** TODO Ajustar o surgimento de buffers de captura
-:LOGBOOK:
-- State "TODO"       from              [2026-09-01 Tue 20:22]
-- Note taken on [2026-09-01 Tue 20:22] \\
-  Quando faço uma captura, o buffer de captura aberto esconde o que estava previamente sendo feito. Seria mais elegante se ele só abrisse algo, sem fechar o buffer.
-:END:
 * Configurações gerais
 Aqui vai todo o comboio de coisas que não são necessariamente relacionadas aos temas abaixo, mas estão por aqui. Localização de variáveis customizadas, backups, numeração global, numeração relativa, remoção de tabs por espaços e tantas outras coisa.
 #+begin_src elisp :tangle "init.el"
@@ -93,8 +95,10 @@ Aqui vai todo o comboio de coisas que não são necessariamente relacionadas aos
   (add-to-list 'default-frame-alist '(fullscreen . maximized))
   ;; Carrega arquivo de configurações
   (load custom-file)
-  (dolist (mode '(eshell-mode-hook dired-mode-hook))
+  (dolist (mode '(eshell-mode-hook dired-mode-hook pdf-view-mode-hook))
     (add-hook mode (lambda () (display-line-numbers-mode 0))))
+  ;; Pra conseguir abrir PDFs grandes
+  (setq large-file-warning-threshold 100000000)
   ;; Ajustes de codificação quando estiver usando Windows
   (pcase system-type
     (windows-nt
@@ -141,6 +145,7 @@ Achei isso por aí.
   :config
   (bookmark-store "Configurações" `((filename . ,(expand-file-name "~/.emacs.d/jclmntn_emacs.org")) (position . 1)) nil)
   (bookmark-store "Repositórios" `((filename . ,(expand-file-name "~/Repos/")) (position . 1)) nil)
+  (bookmark-store "Notas" `((filename . ,(expand-file-name "~/Repos/Notes/")) (position . 1)) nil)
   (bookmark-save))
 #+end_src
 #+end_src
@@ -177,7 +182,7 @@ Hoje, a minha escolha para configurar comandos e navegação com leader-keys é 
   "nf"  '(consult-notes :which-key)
   "nb"  '(denote-backlinks :which-key)
   "nwo" '(citar-open :which-key)
-  "nwc" '(citar-create-note :which-key)
+  "nwn" '(citar-open-notes :which-key)
   "nwx" '(citar-denote-nocite :which-key))
 #+end_src
 ** Todas As Coisas Más (evil)
@@ -500,6 +505,7 @@ No Emacs 31, eu criei a coragem de usar a solução nativa de emacs, abandonando
 
 (use-package minibuffer
   :ensure nil
+  :hook (completion-list-mode . (lambda () (setq truncate-lines t))) ;; Para fazer com que as completions fiquem sempre na mesma linha.
   :bind
   (:map completion-list-mode-map
         ("RET" . choose-completion))
@@ -993,15 +999,22 @@ Para gerenciar arquivos bibtex, eu utilizo o =ebib=.
 #+end_src
 
 Para obter referências bibliográficas de diferentes fontes, eu utilizo o =biblio=.
+Uma coisa importante, como =biblio-openlibrary= é um pacote do github, é preciso apontar para o /commit/ mais recente usando as keywords =:rev :newest=, caso contrário, acabamos instalando o pacote.
 #+begin_src elisp :tangle "init.el"
 (use-package biblio)
 
 (use-package biblio-openlibrary
-  :vc (:url "https://github.com/fabcontigiani/biblio-openlibrary" :branch "master")
+  :vc (:url "https://github.com/fabcontigiani/biblio-openlibrary"
+       :rev :newest)
   :after biblio
   :demand t)
 #+end_src
-
+** Leitura de pdfs
+Não se esquecer de invocar a função =pdf-tools-install= caso um pdf não abra.
+#+begin_src elisp :tangle "init.el"
+(use-package pdf-tools
+  :config (pdf-loader-install))
+#+end_src
 ** A configuração do org-mode em si                                    :WSL:
 Eu precisei fazer um hardcoding do valor de uma função devido a problemas quando trabalho com o WSL.
 De vez em quando eu crio objetos no plantuml, então ele está pré-configurado.
@@ -1055,6 +1068,10 @@ Uma carinha mais bela para buffers do org-mode
 (use-package org-modern
   :config
   (global-org-modern-mode))
+#+end_src
+** Notas em documentos
+#+begin_src elisp :tangle "init.el"
+(use-package org-noter)
 #+end_src
 ** Hábitos
 Preciso disso ativo para garantir que os hábitos funcionam.

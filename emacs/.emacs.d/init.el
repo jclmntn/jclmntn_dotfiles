@@ -23,8 +23,10 @@
   (add-to-list 'default-frame-alist '(fullscreen . maximized))
   ;; Carrega arquivo de configurações
   (load custom-file)
-  (dolist (mode '(eshell-mode-hook dired-mode-hook))
+  (dolist (mode '(eshell-mode-hook dired-mode-hook pdf-view-mode-hook))
     (add-hook mode (lambda () (display-line-numbers-mode 0))))
+  ;; Pra conseguir abrir PDFs grandes
+  (setq large-file-warning-threshold 100000000)
   ;; Ajustes de codificação quando estiver usando Windows
   (pcase system-type
     (windows-nt
@@ -65,6 +67,7 @@
   :config
   (bookmark-store "Configurações" `((filename . ,(expand-file-name "~/.emacs.d/jclmntn_emacs.org")) (position . 1)) nil)
   (bookmark-store "Repositórios" `((filename . ,(expand-file-name "~/Repos/")) (position . 1)) nil)
+  (bookmark-store "Notas" `((filename . ,(expand-file-name "~/Repos/Notes/")) (position . 1)) nil)
   (bookmark-save))
 
 (use-package general
@@ -97,7 +100,7 @@
   "nf"  '(consult-notes :which-key)
   "nb"  '(denote-backlinks :which-key)
   "nwo" '(citar-open :which-key)
-  "nwc" '(citar-create-note :which-key)
+  "nwn" '(citar-open-notes :which-key)
   "nwx" '(citar-denote-nocite :which-key))
 
 (defun jclmntn/my-bind-layout-marks (alist evil-fn prefix)
@@ -346,6 +349,7 @@
 
 (use-package minibuffer
   :ensure nil
+  :hook (completion-list-mode . (lambda () (setq truncate-lines t))) ;; Para fazer com que as completions fiquem sempre na mesma linha.
   :bind
   (:map completion-list-mode-map
         ("RET" . choose-completion))
@@ -733,9 +737,13 @@
 (use-package biblio)
 
 (use-package biblio-openlibrary
-  :vc (:url "https://github.com/fabcontigiani/biblio-openlibrary" :branch "master")
+  :vc (:url "https://github.com/fabcontigiani/biblio-openlibrary"
+       :rev :newest)
   :after biblio
   :demand t)
+
+(use-package pdf-tools
+  :config (pdf-loader-install))
 
 (use-package org
   :hook
@@ -781,6 +789,8 @@
 (use-package org-modern
   :config
   (global-org-modern-mode))
+
+(use-package org-noter)
 
 (require 'org-habit)
 
